@@ -1,0 +1,27 @@
+name: ZeroAuth
+version: 1.1.1
+main: dev.zerostudios.zeroauth.ZeroAuthPlugin
+api-version: '1.13'
+authors: [ZeroStudios]
+description: Secure limbo-style authentication for modern Minecraft servers.
+website: https://dev.zerostudios
+libraries:
+  - com.mysql:mysql-connector-j:9.0.0
+  - org.postgresql:postgresql:42.7.4
+  - org.xerial:sqlite-jdbc:3.46.1.0
+  - org.mongodb:mongodb-driver-sync:5.1.4
+commands:
+  register:
+    description: Register your ZeroAuth account.
+    usage: /register <password> <password>
+  login:
+    description: Authenticate with your ZeroAuth account.
+    usage: /login <password>
+  zeroauth:
+    description: Manage ZeroAuth.
+    usage: /zeroauth <reload|setspawn|auth|logout|status>
+    aliases: [zauth]
+permissions:
+  zeroauth.admin:
+    description: Manage ZeroAuth and authenticate players.
+    default: op

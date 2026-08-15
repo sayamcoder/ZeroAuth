@@ -1,0 +1,57 @@
+auth-world:
+  name: virtual_world_auth
+  mode: void
+  reset-existing-world: true
+  environment: THE_END
+  spawn:
+    x: 0.5
+    y: 100.0
+    z: 0.5
+    yaw: 0.0
+    pitch: 0.0
+
+storage:
+  type: flatfile
+  mysql:
+    url: jdbc:mysql://localhost:3306/zeroauth
+    username: zeroauth
+    password: change-me
+  postgresql:
+    url: jdbc:postgresql://localhost:5432/zeroauth
+    username: zeroauth
+    password: change-me
+  sqlite:
+    file: zeroauth.db
+  mongodb:
+    connection-string: mongodb://localhost:27017
+    database: zeroauth
+    collection: users
+
+security:
+  minimum-password-length: 8
+  allowed-unauthenticated-commands:
+    - login
+    - register
+    - help
+    - zeroauth
+
+messages:
+  prefix: '<dark_gray>[<gradient:#00d4ff:#7a5cff>ZeroAuth</gradient><dark_gray>] <gray>'
+  join: '<yellow>Authenticate with <gold>/login [password]</gold> or <gold>/register [password] [password]</gold>.'
+  registered: '<green>Registration complete. Welcome!'
+  logged-in: '<green>Authentication successful.'
+  logged-out: '<yellow>You have been logged out.'
+  already-registered: '<red>That account is already registered.'
+  not-registered: '<red>That account is not registered. Use <gold>/register &lt;password&gt; &lt;password&gt;</gold>.'
+  invalid-password: '<red>The password is invalid or does not meet the minimum length.'
+  password-mismatch: '<red>The passwords do not match.'
+  already-authenticated: '<red>You are already authenticated.'
+  command-blocked: '<red>You must authenticate before using that command.'
+  player-not-found: '<red>That player is not online.'
+  no-permission: '<red>You do not have permission.'
+  reload: '<green>ZeroAuth configuration and event scripts reloaded.'
+  spawn-set: '<green>Authentication-world spawn updated.'
+  forced-auth: '<green>Player authenticated.'
+  forced-logout: '<yellow>Player logged out.'
+  status: '<yellow>{player} <dark_gray>registered=<white>{registered} <dark_gray>authenticated=<white>{authenticated}'
+  usage: '<yellow>Usage: <white>{usage}'

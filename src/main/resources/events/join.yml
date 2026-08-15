@@ -1,0 +1,4 @@
+event: join
+enabled: true
+actions:
+  - 'message: &aWelcome, {player}!'

@@ -1,0 +1,8 @@
+include:
+  - kotlin-stdlib
+  - adventure-text-minimessage
+  - adventure-text-serializer-legacy
+  - mysql-connector-j
+  - postgresql
+  - sqlite-jdbc
+  - mongodb-driver-sync
