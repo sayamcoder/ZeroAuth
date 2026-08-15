@@ -15,7 +15,7 @@ ZeroAuth is a secure, limbo-style authentication plugin for modern Minecraft ser
 - MiniMessage, legacy `&` colors, and hex color support in messages.
 - Configurable join event scripts.
 - Administrator commands for reload, spawn management, forced authentication, logout, and status checks.
-- Maven assembly packaging with the Kotlin and Adventure runtime dependencies included in the final JAR.
+- Maven Shade packaging with the Kotlin and relocated Adventure runtime dependencies included in the final JAR.
 
 ## Requirements
 
@@ -36,15 +36,15 @@ From the project root, run:
 mvn clean package
 ```
 
-The Maven Assembly Plugin creates the uploadable plugin JAR at:
+The Maven Shade Plugin creates the uploadable plugin JAR at:
 
 ```text
 target/zeroauth-1.1.1.jar
 ```
 
-Use the assembled JAR from `target`, not an intermediate or source JAR. The assembled file contains the plugin classes, Kotlin runtime, Adventure MiniMessage runtime, and Adventure legacy serializer required by ZeroAuth.
+Use the shaded JAR from `target`, not an intermediate or source JAR. The shaded file contains the plugin classes, Kotlin runtime, and relocated Adventure MiniMessage runtime required by ZeroAuth. Relocation prevents conflicts with Adventure versions supplied by the server or other plugins.
 
-The database drivers are intentionally excluded from the assembled JAR because Paper loads them from the `libraries` section of `plugin.yml` when a supported Paper server starts the plugin. Flat-file storage does not require any additional database setup.
+The database drivers are intentionally excluded from the shaded JAR because Paper loads them from the `libraries` section of `plugin.yml` when a supported Paper server starts the plugin. Flat-file storage does not require any additional database setup.
 
 ## Installing on a server
 
@@ -57,7 +57,7 @@ The database drivers are intentionally excluded from the assembled JAR because P
 7. Edit `plugins/ZeroAuth/config.yml` as required.
 8. Start the server again, or run `/zeroauth reload` after changing reloadable settings.
 
-Do not place the JAR inside `plugins/.paper-remapped`. Paper creates and manages that directory automatically. Always upload the original assembled JAR to `plugins`.
+Do not place the JAR inside `plugins/.paper-remapped`. Paper creates and manages that directory automatically. Always upload the original shaded JAR to `plugins`.
 
 ### Important upload notes
 
@@ -281,13 +281,13 @@ ZeroAuth also creates its authentication world in the server world container. Ba
 
 ### `NoClassDefFoundError` for MiniMessage
 
-Build and upload the Maven assembly JAR:
+Build and upload the Maven shaded JAR:
 
 ```bash
 mvn clean package
 ```
 
-Then upload `target/zeroauth-1.1.1.jar` and remove old duplicate JARs. Do not upload an intermediate Maven artifact or a previously built `ZeroAuth-1.0.0` file.
+Then upload `target/zeroauth-1.1.1.jar` and remove old duplicate JARs. Do not upload an intermediate Maven artifact or a previously built `ZeroAuth-1.0.0` file. Run `mvn clean package` so stale classes from an older build cannot remain in the JAR.
 
 ### The plugin is not detected
 
@@ -318,7 +318,7 @@ Stop the server, back up important data, verify `auth-world.name`, and decide wh
 1. Back up `plugins/ZeroAuth/`, including `users.yml`, `config.yml`, and `events/`.
 2. Stop the server.
 3. Remove the old ZeroAuth JAR.
-4. Copy the new assembled Maven JAR into `plugins/`.
+4. Copy the new shaded Maven JAR into `plugins/`.
 5. Start the server and inspect the console.
 6. Compare any newly generated configuration with your backup and reapply custom settings carefully.
 
@@ -331,7 +331,6 @@ ZeroAuth/
 ├── pom.xml
 ├── ReadME.md
 ├── src/
-│   ├── assembly/spigot.xml
 │   ├── main/kotlin/dev/zerostudios/zeroauth/
 │   │   ├── ZeroAuthPlugin.kt
 │   │   ├── auth/

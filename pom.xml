@@ -93,19 +93,32 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.7.1</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assembly/spigot.xml</descriptor>
-                    </descriptors>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <id>package-spigot-jar</id>
                         <phase>package</phase>
-                        <goals><goal>single</goal></goals>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>io.papermc.paper:paper-api</exclude>
+                                    <exclude>com.mysql:*</exclude>
+                                    <exclude>org.postgresql:*</exclude>
+                                    <exclude>org.xerial:*</exclude>
+                                    <exclude>org.mongodb:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.kyori</pattern>
+                                    <shadedPattern>dev.zerostudios.zeroauth.libs.net.kyori</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
