@@ -12,10 +12,10 @@ ZeroAuth is a secure, limbo-style authentication plugin for modern Minecraft ser
 - Movement, teleportation, damage, hunger, inventory access, and commands blocked while unauthenticated.
 - Configurable command allowlist for unauthenticated players.
 - Flat-file, MySQL, PostgreSQL, SQLite, and MongoDB storage options.
-- MiniMessage, legacy `&` colors, and hex color support in messages.
+- Legacy `&` colors and hex color support in messages.
 - Configurable join event scripts.
 - Administrator commands for reload, spawn management, forced authentication, logout, and status checks.
-- Maven Shade packaging with the Kotlin and Adventure runtime dependencies included in the final JAR.
+- Maven Shade packaging with the Kotlin runtime included in the final JAR.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ The Maven Shade Plugin creates the uploadable plugin JAR at:
 target/zeroauth-1.1.1.jar
 ```
 
-Use the shaded JAR from `target`, not an intermediate or source JAR. The shaded file contains the plugin classes, Kotlin runtime, and Adventure MiniMessage runtime required by ZeroAuth.
+Use the shaded JAR from `target`, not an intermediate or source JAR. The shaded file contains the plugin classes and Kotlin runtime required by ZeroAuth. ZeroAuth does not depend on MiniMessage or any other external Adventure class at runtime.
 
 The database drivers are intentionally excluded from the shaded JAR because Paper loads them from the `libraries` section of `plugin.yml` when a supported Paper server starts the plugin. Flat-file storage does not require any additional database setup.
 
@@ -226,7 +226,7 @@ Only add commands that are safe for unauthenticated players. Adding a command to
 
 Messages are under `messages` in `config.yml`. They support:
 
-- MiniMessage tags, for example `<green>` and `<gradient:#00d4ff:#7a5cff>`.
+- Named color tags, for example `<green>` and `<gradient:#00d4ff:#7a5cff>`. These are converted internally without a MiniMessage dependency.
 - Legacy colors, for example `&a` and `&l`.
 - Hex colors, for example `&#00d4ff`.
 - `{player}`, `{registered}`, and `{authenticated}` placeholders where applicable.
@@ -279,7 +279,7 @@ ZeroAuth also creates its authentication world in the server world container. Ba
 
 ## Troubleshooting
 
-### `NoClassDefFoundError` for MiniMessage
+### `NoClassDefFoundError` for MiniMessage or relocated Adventure classes
 
 Build and upload the Maven shaded JAR:
 
@@ -287,7 +287,7 @@ Build and upload the Maven shaded JAR:
 mvn clean package
 ```
 
-Then upload `target/zeroauth-1.1.1.jar` and remove old duplicate JARs. Do not upload an intermediate Maven artifact or a previously built `ZeroAuth-1.0.0` file. Run `mvn clean package` so stale classes from an older build cannot remain in the JAR.
+Then upload `target/zeroauth-1.1.1.jar` and remove every old or duplicate ZeroAuth JAR. Do not upload an intermediate Maven artifact or a previously built file. Also remove the cached ZeroAuth file from `plugins/.paper-remapped/`; Paper recreates that directory. The new build contains no MiniMessage reference, so this error cannot occur with the new JAR.
 
 ### The plugin is not detected
 
