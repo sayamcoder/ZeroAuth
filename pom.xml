@@ -103,6 +103,7 @@
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <shadedArtifactAttached>false</shadedArtifactAttached>
+                            <minimizeJar>false</minimizeJar>
                             <artifactSet>
                                 <excludes>
                                     <exclude>io.papermc.paper:paper-api</exclude>
@@ -112,12 +113,6 @@
                                     <exclude>org.mongodb:*</exclude>
                                 </excludes>
                             </artifactSet>
-                            <relocations>
-                                <relocation>
-                                    <pattern>net.kyori</pattern>
-                                    <shadedPattern>dev.zerostudios.zeroauth.libs.net.kyori</shadedPattern>
-                                </relocation>
-                            </relocations>
                         </configuration>
                     </execution>
                 </executions>

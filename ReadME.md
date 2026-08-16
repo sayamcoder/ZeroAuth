@@ -15,7 +15,7 @@ ZeroAuth is a secure, limbo-style authentication plugin for modern Minecraft ser
 - MiniMessage, legacy `&` colors, and hex color support in messages.
 - Configurable join event scripts.
 - Administrator commands for reload, spawn management, forced authentication, logout, and status checks.
-- Maven Shade packaging with the Kotlin and relocated Adventure runtime dependencies included in the final JAR.
+- Maven Shade packaging with the Kotlin and Adventure runtime dependencies included in the final JAR.
 
 ## Requirements
 
@@ -42,7 +42,7 @@ The Maven Shade Plugin creates the uploadable plugin JAR at:
 target/zeroauth-1.1.1.jar
 ```
 
-Use the shaded JAR from `target`, not an intermediate or source JAR. The shaded file contains the plugin classes, Kotlin runtime, and relocated Adventure MiniMessage runtime required by ZeroAuth. Relocation prevents conflicts with Adventure versions supplied by the server or other plugins.
+Use the shaded JAR from `target`, not an intermediate or source JAR. The shaded file contains the plugin classes, Kotlin runtime, and Adventure MiniMessage runtime required by ZeroAuth.
 
 The database drivers are intentionally excluded from the shaded JAR because Paper loads them from the `libraries` section of `plugin.yml` when a supported Paper server starts the plugin. Flat-file storage does not require any additional database setup.
 
