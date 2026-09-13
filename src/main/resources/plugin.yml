@@ -17,9 +17,12 @@ commands:
   login:
     description: Authenticate with your ZeroAuth account.
     usage: /login <password>
+  attach-email:
+    description: Attach or remove an email address from your ZeroAuth account.
+    usage: /attach-email <email|remove>
   zeroauth:
     description: Manage ZeroAuth.
-    usage: /zeroauth <reload|setspawn|auth|logout|status>
+    usage: /zeroauth <help|reload|setspawn|auth|logout|status|resetpassword|email|list|tp|info>
     aliases: [zauth]
 permissions:
   zeroauth.admin:

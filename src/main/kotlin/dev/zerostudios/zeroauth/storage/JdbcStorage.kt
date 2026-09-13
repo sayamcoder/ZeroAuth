@@ -36,8 +36,9 @@ class JdbcStorage(private val plugin: ZeroAuthPlugin, private val type: String) 
                 statement.executeUpdate(
                     "CREATE TABLE IF NOT EXISTS zeroauth_users (" +
                         "uuid VARCHAR(36) PRIMARY KEY, password_hash TEXT, world_name VARCHAR(255), " +
-                        "x DOUBLE PRECISION, y DOUBLE PRECISION, z DOUBLE PRECISION, yaw REAL, pitch REAL)"
+                        "x DOUBLE PRECISION, y DOUBLE PRECISION, z DOUBLE PRECISION, yaw REAL, pitch REAL, email TEXT)"
                 )
+                runCatching { statement.executeUpdate("ALTER TABLE zeroauth_users ADD COLUMN email TEXT") }
             }
         }
     }
@@ -54,7 +55,7 @@ class JdbcStorage(private val plugin: ZeroAuthPlugin, private val type: String) 
                 statement.setString(1, uuid.toString())
                 statement.executeQuery().use { result ->
                     if (!result.next()) return null
-                    return UserRecord(uuid, result.getString("password_hash"), readLocation(result))
+                    return UserRecord(uuid, result.getString("password_hash"), readLocation(result), result.getString("email"))
                 }
             }
         }
@@ -70,15 +71,15 @@ class JdbcStorage(private val plugin: ZeroAuthPlugin, private val type: String) 
                 }
                 if (exists) {
                     connection.prepareStatement(
-                        "UPDATE zeroauth_users SET password_hash = ?, world_name = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ? WHERE uuid = ?"
+                        "UPDATE zeroauth_users SET password_hash = ?, world_name = ?, x = ?, y = ?, z = ?, yaw = ?, pitch = ?, email = ? WHERE uuid = ?"
                     ).use { statement ->
                         bindRecord(statement, record, 1)
-                        statement.setString(8, record.uuid.toString())
+                        statement.setString(9, record.uuid.toString())
                         statement.executeUpdate()
                     }
                 } else {
                     connection.prepareStatement(
-                        "INSERT INTO zeroauth_users (uuid, password_hash, world_name, x, y, z, yaw, pitch) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                        "INSERT INTO zeroauth_users (uuid, password_hash, world_name, x, y, z, yaw, pitch, email) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                     ).use { statement ->
                         statement.setString(1, record.uuid.toString())
                         bindRecord(statement, record, 2)
@@ -111,6 +112,7 @@ class JdbcStorage(private val plugin: ZeroAuthPlugin, private val type: String) 
             statement.setFloat(start + 5, location.yaw)
             statement.setFloat(start + 6, location.pitch)
         }
+        if (record.email == null) statement.setNull(start + 7, Types.VARCHAR) else statement.setString(start + 7, record.email)
     }
 
     private fun readLocation(result: ResultSet): LocationData? {

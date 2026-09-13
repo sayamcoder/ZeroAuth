@@ -24,5 +24,6 @@ data class LocationData(
 data class UserRecord(
     val uuid: UUID,
     var passwordHash: String? = null,
-    var lastLocation: LocationData? = null
+    var lastLocation: LocationData? = null,
+    var email: String? = null
 )

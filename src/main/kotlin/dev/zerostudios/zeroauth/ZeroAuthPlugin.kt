@@ -3,12 +3,14 @@ package dev.zerostudios.zeroauth
 import dev.zerostudios.zeroauth.auth.AuthListener
 import dev.zerostudios.zeroauth.auth.AuthManager
 import dev.zerostudios.zeroauth.command.LoginCommand
+import dev.zerostudios.zeroauth.command.EmailCommand
 import dev.zerostudios.zeroauth.command.RegisterCommand
 import dev.zerostudios.zeroauth.command.ZeroAuthCommand
 import dev.zerostudios.zeroauth.event.EventScriptManager
 import dev.zerostudios.zeroauth.storage.StorageFactory
 import dev.zerostudios.zeroauth.storage.StorageProvider
 import dev.zerostudios.zeroauth.world.AuthWorldManager
+import dev.zerostudios.zeroauth.web.WebDashboardServer
 import org.bukkit.command.PluginCommand
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.ChatColor
@@ -20,6 +22,7 @@ class ZeroAuthPlugin : JavaPlugin() {
     private lateinit var storage: StorageProvider
     private lateinit var scripts: EventScriptManager
     private lateinit var manager: AuthManager
+    private var dashboard: WebDashboardServer? = null
 
     override fun onEnable() {
         saveDefaultConfig()
@@ -30,9 +33,11 @@ class ZeroAuthPlugin : JavaPlugin() {
         storage = StorageFactory.create(this)
         scripts = EventScriptManager(this)
         manager = AuthManager(this, storage, authWorlds, scripts)
+        dashboard = WebDashboardServer(this, manager).also { it.start() }
         server.pluginManager.registerEvents(AuthListener(this, manager, authWorlds), this)
         val registerCommand = RegisterCommand(this, manager)
         val loginCommand = LoginCommand(this, manager)
+        val emailCommand = EmailCommand(this, manager)
         val zeroAuthCommand = ZeroAuthCommand(this, manager)
         command("register")?.apply {
             setExecutor(registerCommand)
@@ -41,6 +46,10 @@ class ZeroAuthPlugin : JavaPlugin() {
         command("login")?.apply {
             setExecutor(loginCommand)
             tabCompleter = loginCommand
+        }
+        command("attach-email")?.apply {
+            setExecutor(emailCommand)
+            tabCompleter = emailCommand
         }
         command("zeroauth")?.apply {
             setExecutor(zeroAuthCommand)
@@ -60,12 +69,14 @@ class ZeroAuthPlugin : JavaPlugin() {
     }
 
     override fun onDisable() {
+        dashboard?.stop()
         if (::storage.isInitialized) storage.close()
     }
 
     fun reloadPluginConfiguration() {
         reloadConfig()
         if (::scripts.isInitialized) scripts.reload()
+        dashboard?.restart()
     }
 
     fun message(key: String, replacements: Map<String, String> = emptyMap()): String {

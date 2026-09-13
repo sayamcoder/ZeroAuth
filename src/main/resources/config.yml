@@ -1,12 +1,17 @@
+Gamemode: Adventure
+
 auth-world:
   name: virtual_world_auth
-  mode: void
+  mode: end
   reset-existing-world: true
   environment: THE_END
+  disable-structures: true
+  disable-mob-spawning: true
+  spawn-ender-dragon: false
   spawn:
-    x: 0.5
+    x: 10000.5
     y: 100.0
-    z: 0.5
+    z: 10000.5
     yaw: 0.0
     pitch: 0.0
 
@@ -29,11 +34,26 @@ storage:
 
 security:
   minimum-password-length: 8
+  hide-inventory: true
+  block-commands: true
   allowed-unauthenticated-commands:
     - login
     - register
     - help
     - zeroauth
+
+email:
+  enabled: true
+  validation-regex: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+
+web-dashboard:
+  enabled: false
+  host: 127.0.0.1
+  port: 8765
+  token: change-me
+
+admin:
+  permission: zeroauth.admin
 
 messages:
   prefix: '<dark_gray>[<gradient:#00d4ff:#7a5cff>ZeroAuth</gradient><dark_gray>] <gray>'
@@ -54,4 +74,17 @@ messages:
   forced-auth: '<green>Player authenticated.'
   forced-logout: '<yellow>Player logged out.'
   status: '<yellow>{player} <dark_gray>registered=<white>{registered} <dark_gray>authenticated=<white>{authenticated}'
+  admin-help: '<yellow>/zeroauth <white>reload, setspawn, auth, logout, status, resetpassword, email, list, tp, info'
+  admin-list-header: '<aqua>Online ZeroAuth players:'
+  admin-list-entry: '<gray>- <white>{player} <dark_gray>registered=<white>{registered} <dark_gray>authenticated=<white>{authenticated} <dark_gray>world=<white>{world}'
+  teleported: '<green>Teleported <white>{player}</white> to the authentication world.'
+  world-info: '<yellow>Auth world: <white>{world} <dark_gray>spawn=<white>{spawn}'
+  email-auth-required: '<red>You must be authenticated before attaching an email.'
+  email-attached: '<green>Email setting updated: <white>{email}</white>.'
+  email-managed: '<green>Email setting updated for <white>{player}</white>.'
+  email-requires-registration: '<red>Register an account before attaching an email.'
+  email-invalid: '<red>Enter a valid email address.'
+  email-disabled: '<red>Email attachment is disabled.'
+  password-reset: '<green>Password reset for <white>{player}</white>.'
+  reset-password-not-registered: '<red>That player does not have a registered password.'
   usage: '<yellow>Usage: <white>{usage}'

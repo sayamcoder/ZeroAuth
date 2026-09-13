@@ -30,13 +30,14 @@ class FlatFileStorage(private val plugin: ZeroAuthPlugin) : StorageProvider {
             yaml.getDouble("$locationPath.yaw").toFloat(),
             yaml.getDouble("$locationPath.pitch").toFloat()
         )
-        return UserRecord(uuid, yaml.getString("$path.password"), location)
+        return UserRecord(uuid, yaml.getString("$path.password"), location, yaml.getString("$path.email"))
     }
 
     @Synchronized
     override fun save(record: UserRecord) {
         val path = "users.${record.uuid}"
         yaml.set("$path.password", record.passwordHash)
+        yaml.set("$path.email", record.email)
         val location = record.lastLocation
         if (location == null) {
             yaml.set("$path.location", null)

@@ -37,11 +37,13 @@ class MongoStorage(private val plugin: ZeroAuthPlugin) : StorageProvider {
             val pitch = (it.get("pitch") as? Number)?.toFloat() ?: 0f
             LocationData(world, x, y, z, yaw, pitch)
         }
-        return UserRecord(uuid, document.getString("passwordHash"), location)
+        return UserRecord(uuid, document.getString("passwordHash"), location, document.getString("email"))
     }
 
     override fun save(record: UserRecord) {
-        val document = Document("uuid", record.uuid.toString()).append("passwordHash", record.passwordHash)
+        val document = Document("uuid", record.uuid.toString())
+            .append("passwordHash", record.passwordHash)
+            .append("email", record.email)
         record.lastLocation?.let {
             document.append("location", Document("world", it.world)
                 .append("x", it.x).append("y", it.y).append("z", it.z)

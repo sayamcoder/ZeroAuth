@@ -7,6 +7,7 @@ import dev.zerostudios.zeroauth.model.UserRecord
 import dev.zerostudios.zeroauth.security.PasswordHasher
 import dev.zerostudios.zeroauth.storage.StorageProvider
 import dev.zerostudios.zeroauth.world.AuthWorldManager
+import org.bukkit.GameMode
 import org.bukkit.entity.Player
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -20,6 +21,7 @@ class AuthManager(
     private val authenticated = ConcurrentHashMap.newKeySet<UUID>()
     private val pendingLocations = ConcurrentHashMap<UUID, LocationData>()
     private val originalFlight = ConcurrentHashMap<UUID, FlightState>()
+    private val originalGameModes = ConcurrentHashMap<UUID, GameMode>()
 
     fun handleJoin(player: Player) {
         authenticated.remove(player.uniqueId)
@@ -66,6 +68,36 @@ class AuthManager(
         completeAuthentication(player, record)
     }
 
+    fun resetPassword(uuid: UUID, password: String): ResetPasswordResult {
+        if (password.length < plugin.config.getInt("security.minimum-password-length", 8)) {
+            return ResetPasswordResult.INVALID_PASSWORD
+        }
+        val record = storage.load(uuid) ?: return ResetPasswordResult.NOT_REGISTERED
+        if (record.passwordHash == null) return ResetPasswordResult.NOT_REGISTERED
+        record.passwordHash = PasswordHasher.hash(password)
+        storage.save(record)
+        return ResetPasswordResult.SUCCESS
+    }
+
+    fun attachEmail(uuid: UUID, email: String?): EmailResult {
+        if (!plugin.config.getBoolean("email.enabled", true)) return EmailResult.DISABLED
+        val record = storage.load(uuid) ?: return EmailResult.NOT_REGISTERED
+        if (email != null) {
+            val normalized = email.trim().lowercase()
+            val pattern = plugin.config.getString("email.validation-regex", "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")!!
+            if (!runCatching { Regex(pattern).matches(normalized) }.getOrDefault(false)) {
+                return EmailResult.INVALID
+            }
+            record.email = normalized
+        } else {
+            record.email = null
+        }
+        storage.save(record)
+        return EmailResult.SUCCESS
+    }
+
+    fun email(uuid: UUID): String? = storage.load(uuid)?.email
+
     fun handleQuit(player: Player) {
         if (authenticated.remove(player.uniqueId)) {
             saveLocation(player)
@@ -78,6 +110,7 @@ class AuthManager(
         }
         pendingLocations.remove(player.uniqueId)
         originalFlight.remove(player.uniqueId)
+        originalGameModes.remove(player.uniqueId)
     }
 
     fun isAuthenticated(uuid: UUID): Boolean = authenticated.contains(uuid)
@@ -96,9 +129,11 @@ class AuthManager(
 
     private fun prepareForAuthentication(player: Player) {
         originalFlight.putIfAbsent(player.uniqueId, FlightState(player.allowFlight, player.isFlying))
+        originalGameModes.putIfAbsent(player.uniqueId, player.gameMode)
         player.fallDistance = 0f
         player.isFlying = false
         player.allowFlight = true
+        player.gameMode = configuredGameMode()
     }
 
     private fun restoreFlight(player: Player) {
@@ -106,7 +141,12 @@ class AuthManager(
         player.isFlying = state.flying && state.allowFlight
         player.allowFlight = state.allowFlight
         player.fallDistance = 0f
+        player.gameMode = originalGameModes.remove(player.uniqueId) ?: GameMode.SURVIVAL
     }
+
+    private fun configuredGameMode(): GameMode = runCatching {
+        GameMode.valueOf(plugin.config.getString("Gamemode", "Adventure")!!.uppercase())
+    }.getOrDefault(GameMode.ADVENTURE)
 
     private data class FlightState(val allowFlight: Boolean, val flying: Boolean)
 
@@ -119,4 +159,6 @@ class AuthManager(
 
     enum class RegistrationResult { SUCCESS, PASSWORD_MISMATCH, INVALID_PASSWORD, ALREADY_REGISTERED }
     enum class LoginResult { SUCCESS, NOT_REGISTERED, INVALID_PASSWORD }
+    enum class ResetPasswordResult { SUCCESS, NOT_REGISTERED, INVALID_PASSWORD }
+    enum class EmailResult { SUCCESS, NOT_REGISTERED, INVALID, DISABLED }
 }
